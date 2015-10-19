@@ -66,7 +66,7 @@ namespace WGestures.View.Impl.Windows
         public float PathShadowWidth
         {
             get { return _shadowPenWidth; }
-            set { /*_shadowPenWidth = _shadowPen.Width = value;*/ } //TODO: ignore for temporarily
+            set { _shadowPenWidth = _shadowPen.Width = value; }
         }
         public int PathMaxPointCount
         {
@@ -86,7 +86,7 @@ namespace WGestures.View.Impl.Windows
         Pen _mainPen;
         Pen _alternativePen;
         Pen _borderPen;
-        Pen[] _shadowPens;
+        Pen _shadowPen;
         Pen _dirtyMarkerPen;
         Point _prevPoint;
         //Rectangle _pathDirtyRect;
@@ -174,19 +174,11 @@ namespace WGestures.View.Impl.Windows
             #region init pens
             _mainPen = new Pen(Color.FromArgb(255, 50, 200, 100), widthBase * _dpiFactor) { EndCap = LineCap.Round, StartCap = LineCap.Round };
             _middleBtnPen = new Pen(Color.FromArgb(255, 20, 150, 200), widthBase * _dpiFactor) { EndCap = LineCap.Round, StartCap = LineCap.Round };
-            _borderPen = new Pen(Color.FromArgb(255, 255, 255, 255), (widthBase * 2.5f) * _dpiFactor) { EndCap = LineCap.Round, StartCap = LineCap.Round };
+            _borderPen = new Pen(Color.FromArgb(220, 255, 255, 255), (widthBase + 2.5f) * _dpiFactor) { EndCap = LineCap.Round, StartCap = LineCap.Round };
             _alternativePen = new Pen(Color.FromArgb(255, 255, 120, 20), widthBase * _dpiFactor) { EndCap = LineCap.Round, StartCap = LineCap.Round };
-
-            const int SHADOW_COUNT = 4;
-            _shadowPens = new Pen[SHADOW_COUNT];
-            for (var i=0; i< SHADOW_COUNT; i++)
-            {
-                _shadowPens[i] = new Pen(Color.FromArgb((int)(6 * (SHADOW_COUNT - i)), 255, 255,255), (widthBase * 4 + i*4) * _dpiFactor) { EndCap = LineCap.Round, StartCap = LineCap.Round };
-
-            }
-            
-            _shadowPenWidth = _shadowPens[SHADOW_COUNT -  1].Width;
-            _dirtyMarkerPen = (Pen)_shadowPens[SHADOW_COUNT - 1].Clone();
+            _shadowPen = new Pen(Color.FromArgb(30, 0, 0, 0), (widthBase + 4f) * _dpiFactor) { EndCap = LineCap.Round, StartCap = LineCap.Round };
+            _shadowPenWidth = _shadowPen.Width;
+            _dirtyMarkerPen = (Pen) _shadowPen.Clone();
             _dirtyMarkerPen.Width *= 1.5f;
 
             #endregion
@@ -523,11 +515,7 @@ namespace WGestures.View.Impl.Windows
             #region 1) 绘制路径
             if (ShowPath && _pathVisible)
             {
-                foreach (var p in _shadowPens)
-                {
-                    g.DrawPath(p, _gPath);
-                }
-
+                g.DrawPath(_shadowPen, _gPath);
                 g.DrawPath(_borderPen, _gPath);
                 g.DrawPath(_pathPen, _gPath);
             }
@@ -777,14 +765,7 @@ namespace WGestures.View.Impl.Windows
             _middleBtnPen.Dispose();
             _borderPen.Dispose();
             _alternativePen.Dispose();
-
-            foreach (var p in _shadowPens)
-            {
-                p.Dispose();
-            }
-            _shadowPens = null;
-           
-
+            _shadowPen.Dispose();
             _dirtyMarkerPen.Dispose();
             #endregion
 
